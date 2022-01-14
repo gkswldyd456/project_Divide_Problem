@@ -220,7 +220,61 @@ def Allreplace_circ(): # 원숫자 다 괄호숫자로 바꾸기
     hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
 
 
-
+def Allreplace_rhfqoddl(): # 괄호숫자 앞에 골뱅이 붙여 바꾸기
+    hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
+    hwp.HParameterSet.HFindReplace.FindString = "(1)"; 
+    hwp.HParameterSet.HFindReplace.ReplaceString = "@(1)";
+    hwp.HParameterSet.HFindReplace.FindRegExp = 0;
+    hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
+    hwp.HParameterSet.HFindReplace.FindString = "(2)";
+    hwp.HParameterSet.HFindReplace.ReplaceString = "@(2)";
+    hwp.HParameterSet.HFindReplace.FindRegExp = 0;
+    hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
+    hwp.HParameterSet.HFindReplace.FindString = "(3)";
+    hwp.HParameterSet.HFindReplace.ReplaceString = "@(3)";
+    hwp.HParameterSet.HFindReplace.FindRegExp = 0;
+    hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
+    hwp.HParameterSet.HFindReplace.FindString = "(4)";
+    hwp.HParameterSet.HFindReplace.ReplaceString = "@(4)";
+    hwp.HParameterSet.HFindReplace.FindRegExp = 0;
+    hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
+    hwp.HParameterSet.HFindReplace.FindString = "(5)";
+    hwp.HParameterSet.HFindReplace.ReplaceString = "@(5)";
+    hwp.HParameterSet.HFindReplace.FindRegExp = 0;
+    hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
+    hwp.HParameterSet.HFindReplace.FindString = "(6)";
+    hwp.HParameterSet.HFindReplace.ReplaceString = "@(6)";
+    hwp.HParameterSet.HFindReplace.FindRegExp = 0;
+    hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
+    hwp.HParameterSet.HFindReplace.FindString = "(7)";
+    hwp.HParameterSet.HFindReplace.ReplaceString = "@(7)";
+    hwp.HParameterSet.HFindReplace.FindRegExp = 0;
+    hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
+    hwp.HParameterSet.HFindReplace.FindString = "(8)";
+    hwp.HParameterSet.HFindReplace.ReplaceString = "@(8)";
+    hwp.HParameterSet.HFindReplace.FindRegExp = 0;
+    hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
+    hwp.HParameterSet.HFindReplace.FindString = "(9)";
+    hwp.HParameterSet.HFindReplace.ReplaceString = "@(9)";
+    hwp.HParameterSet.HFindReplace.FindRegExp = 0;
+    hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
 
 
 def tabdiv_pro_sol(): # 1탭에 문제만 2탭에 해설만 / 작동 후 해설 맨 처음
@@ -349,7 +403,7 @@ def tabdiv_sonpro_sol(): # 새끼문제 -> 1탭에 문제/ 작동 후 1탭에 �
     
     hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet); 
     hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
-    hwp.HParameterSet.HFindReplace.FindString = "@\\b*\\(\\d+\\)\\b*"; # @ 다 지워
+    hwp.HParameterSet.HFindReplace.FindString = "@?\\b*\\(\\d+\\)\\b*"; # @ 다 지워
     hwp.HParameterSet.HFindReplace.ReplaceString = " "; 
     hwp.HParameterSet.HFindReplace.FindRegExp = 1;
     hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
@@ -1111,8 +1165,22 @@ def Divide_son_files(son_lists):
         progress_condi.see(END)
         progress_condi.update()
         
+        
+        
         os.remove(os.path.join(dir, son_list))
-        os.remove(os.path.join(dir, son_list.replace("[1hwp][새끼문제].hwp", "[2png].png")))
+        try:
+            os.remove(os.path.join(dir, son_list.replace("[1hwp][새끼문제].hwp", "[2png].png")))
+        except FileNotFoundError:
+            pass
+        # try:
+        #     os.remove(os.path.join(dir, son_list.replace("[3정답][새끼문제].hwp", "[2png].png")))
+        # except FileNotFoundError:
+        #     pass
+        try:
+            os.remove(os.path.join(dir, son_list.replace("[3정답][새끼문제].hwp", "[3정답].png")))
+        except FileNotFoundError:
+            pass
+        
         time.sleep(1)
     time.sleep(1)
 
@@ -1176,9 +1244,9 @@ def Divide_one_pro(file_fullname):
 
     re_file_fullname = file_fullname.replace(".hml", "") +" (수정)"
 
-    while os.path.isfile(re_file_fullname+"[1문제][1hml].hml")==False:
+    while os.path.isfile(re_file_fullname+".hml")==False:
         hwp.HAction.GetDefault("FileSave_S", hwp.HParameterSet.HFileOpenSave.HSet)
-        hwp.HParameterSet.HFileOpenSave.filename = re_file_fullname+"[1문제][1hml].hml"
+        hwp.HParameterSet.HFileOpenSave.filename = re_file_fullname+".hml"
         hwp.HParameterSet.HFileOpenSave.Format = "HWPML2X"
         hwp.HParameterSet.HFileOpenSave.Attributes = 0
         hwp.HAction.Execute("FileSave_S", hwp.HParameterSet.HFileOpenSave.HSet)
@@ -1221,14 +1289,14 @@ def Divide_one_pro(file_fullname):
     hwp.HAction.Execute("FileSaveAsImage", hwp.HParameterSet.HPrint.HSet)
     hwp.HAction.GetDefault("FileSave_S", hwp.HParameterSet.HFileOpenSave.HSet)
 
-    hwp.HParameterSet.HFileOpenSave.filename = re_file_fullname+"[1문제][2png].png"
+    hwp.HParameterSet.HFileOpenSave.filename = re_file_fullname+".png"
     hwp.HParameterSet.HFileOpenSave.Format = "PNG"
     hwp.HParameterSet.HFileOpenSave.Attributes = 0
     hwp.HAction.Execute("FileSave_S", hwp.HParameterSet.HFileOpenSave.HSet)
 
     time.sleep(1)
     
-    os.rename(re_file_fullname+"[1문제][2png]001"+".png", re_file_fullname+"[1문제][2png].png")
+    os.rename(re_file_fullname+"001"+".png", re_file_fullname+".png")
     hwp.XHwpDocuments.Item(0).Close(isDirty=False) # 새창 닫아(저장할지 물어보지 말고)
     
     
@@ -1243,7 +1311,7 @@ def result_div_one_pro(): # 한 문제 hml 저장
         global dir
         dir = r'{0}'.format(fullname[0]).replace("/", "\\")
         name = fullname[1]
-        name_only = re.sub(r".hwp", "", name)
+        name_only = re.sub(r".hml", "", name)
         reidx = idx+1
         progress_head.delete(1.0, END)
         progress_head.insert(END, f"{reidx}번째 파일을 진행합니다.")
@@ -1251,6 +1319,22 @@ def result_div_one_pro(): # 한 문제 hml 저장
         global file_fullname
         file_fullname = os.path.join(dir, name)
         Divide_one_pro(file_fullname) # 수정한 문제파일 조정
+        time.sleep(1)
+        lists = [i for i in os.listdir(dir) if i.startswith(f'{name_only}')] # name_only로 시작하는 파일 찾아라
+        
+        try: # 폴더 만들어 
+            if not os.path.exists(os.path.join(dir, name_only)): os.makedirs(os.path.join(dir, name_only)) 
+        except OSError:
+            print("Error: Cannot create the directory {}".format(os.path.join(dir, name_only)))
+        time.sleep(1)
+        
+        for list in lists: # 지금 작업하는 파일 이름(name_only)이 있는 파일 다 옮겨라 
+            try:
+                shutil.move(os.path.join(dir, list), os.path.join(dir, name_only))
+            except PermissionError:
+                print(f"{list}이 파일이 오류나네??")
+                # os.remove(os.path.join(dir, list))        
+
 
 
 def result_div_one_sol(): # 한 해설 hml 저장
@@ -1262,7 +1346,7 @@ def result_div_one_sol(): # 한 해설 hml 저장
         global dir
         dir = r'{0}'.format(fullname[0]).replace("/", "\\")
         name = fullname[1]
-        name_only = re.sub(r".hwp", "", name)
+        name_only = re.sub(r".hml", "", name)
         reidx = idx+1
         progress_head.delete(1.0, END)
         progress_head.insert(END, f"{reidx}번째 파일을 진행합니다.")
@@ -1270,6 +1354,40 @@ def result_div_one_sol(): # 한 해설 hml 저장
         global file_fullname
         file_fullname = os.path.join(dir, name)
         Divide_one_sol(file_fullname) # 수정한 문제파일 조정
+        
+        progress_condi.insert(END, f"{reidx}번째 파일 - 나누기 작업 완료\n")
+        progress_condi.see(END)
+        progress_condi.update()
+        
+        global son_lists, sons
+        son_lists = [i for i in os.listdir(dir) if "새끼문제" in i] # son_lists 리스트 안에 dir 안의 파일 중 "새끼문제"가 있는 파일 이름 저장
+        sons = len(cnt_son_lists)
+        
+        progress_condi.insert(END, f"새끼문제 개수는 {sons}개 입니다.\n")
+        progress_condi.see(END)
+        progress_condi.update()
+
+        # print(cnt_son_lists) # cnt_son_lists는 첫번째 새끼문제 부터 각 새끼문제의 개수 넣어둠.
+        
+        
+        if len(son_lists) != 0: # 새끼문제 있으면
+            Divide_son_files(son_lists) #새끼문제 돌려
+            
+        time.sleep(1)
+        lists = [i for i in os.listdir(dir) if i.startswith(f'{name_only}')] # name_only로 시작하는 파일 찾아라
+        
+        try: # 폴더 만들어 
+            if not os.path.exists(os.path.join(dir, name_only)): os.makedirs(os.path.join(dir, name_only)) 
+        except OSError:
+            print("Error: Cannot create the directory {}".format(os.path.join(dir, name_only)))
+        time.sleep(1)
+        
+        for list in lists: # 지금 작업하는 파일 이름(name_only)이 있는 파일 다 옮겨라 
+            try:
+                shutil.move(os.path.join(dir, list), os.path.join(dir, name_only))
+            except PermissionError:
+                print(f"{list}이 파일이 오류나네??")
+                # os.remove(os.path.join(dir, list))
         
 
 def Divide_one_sol(file_fullname):
@@ -1280,19 +1398,113 @@ def Divide_one_sol(file_fullname):
     multicolumn_1() # 페이지 1단으로 
 
     hwp.MovePos(3) # 해설 맨 마지막 끝으로가서
+    
     global solution_page
     solution_page = hwp.KeyIndicator()[3] # 현재 커서의 페이지 번호 저장
-    
-    re_file_fullname = file_fullname.replace(".hml", "") +" (수정)"
 
-    while os.path.isfile(re_file_fullname+"[2해설][1hml].hml")==False:
+    global cnt_son_lists
+    cnt_son_lists = []
+
+    global re_file_fullname
+    re_file_fullname = file_fullname.replace(".hml", "") +" (수정)"
+    
+    hwp.MovePos(2)
+    
+    hwp.HAction.Run("Select");
+    hwp.HAction.Run("Select");
+    hwp.HAction.Run("Select");
+    text = hwp.GetTextFile("TEXT","saveblock");
+    hwp.HAction.Run("Cancel");
+    
+    cnt_rhfqoddl = len(re.findall(r'@', text)) # text 중 @의 개수
+
+    hwp.MovePos(2)
+    
+    hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet); 
+    hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
+    hwp.HParameterSet.HFindReplace.FindString = "@"; # @ 다 지워
+    hwp.HParameterSet.HFindReplace.ReplaceString = ""; 
+    hwp.HParameterSet.HFindReplace.FindRegExp = 1;
+    hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+
+    while os.path.isfile(re_file_fullname+".hml")==False: # 해설 hml 저장해
         hwp.HAction.GetDefault("FileSave_S", hwp.HParameterSet.HFileOpenSave.HSet)
-        hwp.HParameterSet.HFileOpenSave.filename = re_file_fullname+"[2해설][1hml].hml"
+        hwp.HParameterSet.HFileOpenSave.filename = re_file_fullname+".hml"
         hwp.HParameterSet.HFileOpenSave.Format = "HWPML2X"
         hwp.HParameterSet.HFileOpenSave.Attributes = 0
         hwp.HAction.Execute("FileSave_S", hwp.HParameterSet.HFileOpenSave.HSet)
     time.sleep(0.2)
 
+    hwp.HAction.GetDefault("FileSaveAsImage", hwp.HParameterSet.HPrint.HSet) # 해설 png 저장해
+    hwp.HParameterSet.HPrint.PrinterName = "그림으로 저장하기"
+    hwp.HParameterSet.HPrint.PrintAutoFootNote = 0
+    hwp.HParameterSet.HPrint.PrintAutoHeadNote = 0
+    hwp.HParameterSet.HPrint.PrintMethod = hwp.PrintType("Nomal")
+    hwp.HParameterSet.HPrint.Collate = 1
+    hwp.HParameterSet.HPrint.UserOrder = 0
+    hwp.HParameterSet.HPrint.PrintToFile = 0
+    hwp.HParameterSet.HPrint.NumCopy = 1
+    hwp.HParameterSet.HPrint.OverlapSize = 0
+    hwp.HParameterSet.HPrint.PrintCropMark = 0
+    hwp.HParameterSet.HPrint.BinderHoleType = 0
+    hwp.HParameterSet.HPrint.ZoomX = 100
+    hwp.HParameterSet.HPrint.UsingPagenum = 1
+    hwp.HParameterSet.HPrint.ReverseOrder = 0
+    hwp.HParameterSet.HPrint.Pause = 0
+    hwp.HParameterSet.HPrint.PrintImage = 1
+    hwp.HParameterSet.HPrint.PrintDrawObj = 1
+    hwp.HParameterSet.HPrint.PrintClickHere = 0
+    hwp.HParameterSet.HPrint.EvenOddPageType = 0
+    hwp.HParameterSet.HPrint.PrintWithoutBlank = 0
+    hwp.HParameterSet.HPrint.PrintAutoFootnoteLtext = "^f"
+    hwp.HParameterSet.HPrint.PrintAutoFootnoteCtext = "^t"
+    hwp.HParameterSet.HPrint.PrintAutoFootnoteRtext = "^P쪽 중 ^p쪽"
+    hwp.HParameterSet.HPrint.PrintAutoHeadnoteLtext = "^c"
+    hwp.HParameterSet.HPrint.PrintAutoHeadnoteCtext = "^n"
+    hwp.HParameterSet.HPrint.PrintAutoHeadnoteRtext = "^p"
+    hwp.HParameterSet.HPrint.ZoomY = 100
+    hwp.HParameterSet.HPrint.PrintFormObj = 1
+    hwp.HParameterSet.HPrint.PrintMarkPen = 0
+    hwp.HParameterSet.HPrint.PrintBarcode = 1
+    hwp.HParameterSet.HPrint.Device = hwp.PrintDevice("Image")
+    hwp.HParameterSet.HPrint.PrintPronounce = 0
+
+    hwp.HAction.Execute("FileSaveAsImage", hwp.HParameterSet.HPrint.HSet)
+    hwp.HAction.GetDefault("FileSave_S", hwp.HParameterSet.HFileOpenSave.HSet)
+
+    hwp.HParameterSet.HFileOpenSave.filename = re_file_fullname+".png"
+    hwp.HParameterSet.HFileOpenSave.Format = "PNG"
+    hwp.HParameterSet.HFileOpenSave.Attributes = 0
+    hwp.HAction.Execute("FileSave_S", hwp.HParameterSet.HFileOpenSave.HSet)
+
+    time.sleep(1)
+    
+    if solution_page==1:
+        os.rename(re_file_fullname+"001"+".png", re_file_fullname+".png")
+    else:
+        image_merge(re_file_fullname)
+    
+    time.sleep(0.2)
+    
+    hwp.MovePos(2)
+    
+    hwp.HAction.Run("Select");
+    hwp.HAction.Run("Select");
+    hwp.HAction.Run("Select");
+    hwp.HAction.Run("Cancel");
+    hwp.HAction.Run("MoveSelTopLevelEnd");
+    hwp.HAction.Run("DeleteBack");
+    
+    Allreplace_rhfqoddl() # 괄호숫자 앞에 골뱅이 붙여 바꾸기
+
+    hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet); #정답 없애기
+    hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
+    hwp.HParameterSet.HFindReplace.FindString = "\\b*\\[*\\(*정답\\]*\\)*\\b*"; # 정답 형태를 [정답] 으로 다 바꿔
+    hwp.HParameterSet.HFindReplace.ReplaceString = " "; # 바꾸는 문자는 정규식 안먹음
+    hwp.HParameterSet.HFindReplace.FindRegExp = 1;
+    hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+    time.sleep(0.1)
+    
     hwp.HAction.GetDefault("FileSaveAsImage", hwp.HParameterSet.HPrint.HSet)
     hwp.HParameterSet.HPrint.PrinterName = "그림으로 저장하기"
     hwp.HParameterSet.HPrint.PrintAutoFootNote = 0
@@ -1330,22 +1542,114 @@ def Divide_one_sol(file_fullname):
     hwp.HAction.Execute("FileSaveAsImage", hwp.HParameterSet.HPrint.HSet)
     hwp.HAction.GetDefault("FileSave_S", hwp.HParameterSet.HFileOpenSave.HSet)
 
-    hwp.HParameterSet.HFileOpenSave.filename = re_file_fullname+"[2해설][2png].png"
+    hwp.HParameterSet.HFileOpenSave.filename = re_file_fullname+"[3정답].png"
     hwp.HParameterSet.HFileOpenSave.Format = "PNG"
     hwp.HParameterSet.HFileOpenSave.Attributes = 0
     hwp.HAction.Execute("FileSave_S", hwp.HParameterSet.HFileOpenSave.HSet)
+    
+    os.rename(re_file_fullname+"[3정답]001"+".png", re_file_fullname+"[3정답].png")
+    
+    count_eqed(hwp) # 수식개수 세기 / cnt_eqed 라는 변수에 저장
+    
+    hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet); # 엔터없애기
+    hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
+    hwp.HParameterSet.HFindReplace.FindString = "^n";
+    hwp.HParameterSet.HFindReplace.ReplaceString = "";
+    hwp.HParameterSet.HFindReplace.FindRegExp = 1;
+    hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
 
-    time.sleep(1)
+    hwp.HAction.Run("SelectAll")
+    real_text = hwp.GetTextFile("TEXT","saveblock"); # real_text란 변수에 전체 텍스트 넣기
+    hwp.HAction.Run("Cancel");
+    hwp.MovePos(2)
+    hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet);
+    hwp.HParameterSet.HInsertText.Text = " ";
+    hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet);
+    hwp.MovePos(2)
+    hwp.HAction.Run("MoveSelNextWord");
+    hwp.HAction.Run("Delete");
     
-    if solution_page==1:
-        os.rename(re_file_fullname+"[2해설][2png]001"+".png", re_file_fullname+"[2해설][2png].png")
-    else:
-        image_merge(re_file_fullname+"[2해설][2png]")
     
+    re_real_text = re.sub('\s+|,', "", real_text) # 수식을 제외한 글자들 중 띄어쓰기/,를 제외한 글자
+    
+    cnt_circ = len(re.findall(r'[①②③④⑤⑥⑦⑧⑨]', re_real_text)) # text 중 원문자 개수
+    cnt_circ_no = len(re.findall(r'[^①②③④⑤⑥⑦⑧⑨]', re_real_text)) # text 중 원문자 외 문자 개수
+    
+    # cnt_OX = len(re.findall(r'[OX]', re_real_text)) # text 중 대문자 O, X 의 개수
+    # cnt_TF = len(re.findall(r'[TF]', re_real_text)) # text 중 대문자 T, F 의 개수
+    # cnt_TF_ko = len(re.findall(r'참|거짓', re_real_text)) # text 중 참 거짓 의 개수
+    cnt_OXTF = len(re.findall(r'[OX]|[TF]|참|거짓', re_real_text)) # text 중 대문자 O, X, T, F, 참, 거짓 의 개수
+    cnt_OXTF_no_text = len(re.sub('O|X|T|F|참|거짓', "", re_real_text)) # re_real_text 문자열 중 O, X, T, F, 참, 거짓 를 제외한 문자
+    
+    global cnt_son
+    cnt_son = cnt_rhfqoddl # text 중 @의 개수
+    if cnt_son !=0 : 
+        cnt_son_lists.append(cnt_son)
+    
+    if cnt_son == 0: # 만약 @(새끼문제 기호) 개수가 0이면 -> 새끼문제는 아니네
+        if "해설참조" not in re_real_text : # 해설참조 없을때 
+            if cnt_eqed == 0: # 만약 수식 개수가 0이면
+                if len(re_real_text) == 0 : # 텍스트가 없으면 [빈해설파일] -> 수식도 없고 텍스트도 없으면 빈해설이지
+                    Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
+                    save_onesol_hwp("[빈해설파일]")
+                elif cnt_circ_no == 0: # 원문자 외 문자가 없으면
+                    if cnt_circ == 1 : # 원문자가 1개 이면 [객관식(선다-단일)]
+                        Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
+                        save_onesol_hwp("[객관식(선다-단일)]")
+                    elif cnt_circ > 1 : # 원문자가 2개 이상이면 
+                        Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
+                        save_onesol_hwp("[객관식(선다-다중)]")
+                    else : # 혹시 print 해보기
+                        progress_head.delete(1.0, END)
+                        progress_head.insert(END, f"원문자 외 문자가 없는데 원문자가 없어...이건 뭔상황일까???")
+                        progress_head.update()
+                else: # 원문자 외 문자가 있으면
+                    if cnt_OXTF_no_text == 0: # O, X, T, F, 참, 거짓 외 글자가 존재 X ([정답]/띄어쓰기/콤마제외)
+                        if cnt_OXTF == 1: # O, X, T, F, 참, 거짓 -> 1개만 
+                            Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
+                            save_onesol_hwp("[객관식(OX-단일)]")
+                        elif cnt_OXTF > 1: # O, X, T, F, 참, 거짓 -> 2개 이상 
+                            Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
+                            save_onesol_hwp("[객관식(OX-다중)]")
+                        else : # 혹시 print 해보기
+                            progress_head.delete(1.0, END)
+                            progress_head.insert(END, f"O, X, T, F, 참, 거짓 외 글자가 없는데 저게 없어...이건 뭔상황일까???")
+                            progress_head.update()
+                    else : # O, X, T, F, 참, 거짓 외 글자가 존재 O
+                        Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
+                        save_onesol_hwp("[주관식(자판)]")
+            elif cnt_eqed == 1: # 만약 수식 개수가 1개 이면
+                equation_to_text_all(hwp)
+                if len(sum_reST) == 0: # +-숫자 외의 문자가 없으면 -> 정수
+                    Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
+                    save_onesol_hwp("[주관식(정수)]")
+                else : # +-숫자 외의 문자가 있으면 -> 정수 X -> 단 <보기> 정답 a,b,c 이런 경우는 사람이 고쳐야함
+                    Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
+                    save_onesol_hwp("[주관식(iink)]")
+            else: # 만약 수식 개수가 2개 이상이면 -> 단 <보기> 정답 a,b,c 이런 경우는 사람이 고쳐야함
+                equation_to_text_all(hwp)
+                Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
+                save_onesol_hwp("[주관식(iink)]")
+        else: # 해설참조 있으면 [증명문제]
+            Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
+            save_onesol_hwp("[증명문제]") 
+    else: # 만약 @(새끼문제 기호) 개수가 0이면 -> 새끼문제이네
+        save_onesol_hwp("[새끼문제]") # 일단 새끼문제는 저장한 후 다시 처
+
     time.sleep(0.2)
-    hwp.XHwpDocuments.Item(0).Close(isDirty=False) # 새창 닫아(저장할지 물어보지 말고)
-    
 
+    hwp.XHwpDocuments.Item(0).Close(isDirty=False) # 새창 닫아(저장할지 물어보지 말고)
+
+    
+def save_onesol_hwp(type):  # 수정해설 정답 hwp파일 저장할거야 num = 문제번호, type = 정답종류
+    # re_file_fullname + str(type) # 확장자 없는 이름
+    while os.path.isfile(re_file_fullname +"[3정답]"+ str(type)+".hwp")==False:
+        hwp.HAction.GetDefault("FileSave_S", hwp.HParameterSet.HFileOpenSave.HSet)
+        hwp.HParameterSet.HFileOpenSave.filename = re_file_fullname +"[3정답]"+ str(type)+".hwp"
+        hwp.HParameterSet.HFileOpenSave.Format = "HWP"
+        hwp.HParameterSet.HFileOpenSave.Attributes = 0
+        hwp.HAction.Execute("FileSave_S", hwp.HParameterSet.HFileOpenSave.HSet)
+    time.sleep(0.2)
 
 
 
@@ -1353,7 +1657,7 @@ def Divide_one_sol(file_fullname):
 # 파일 추가
 def add_file():
     files = filedialog.askopenfilenames(title="분할할 hwp파일을 선택하세요", \
-        filetypes=(("HWP 파일", "*.hwp"), ("모든 파일", "*.*")), \
+        filetypes=(("HWP 파일", "*.hwp"), ("HML 파일", "*.hml"), ("모든 파일", "*.*")), \
         initialdir=os.path.expanduser(r"~\Desktop"))
         # 최초에 사용자가 지정한 경로를 보여줌
     
