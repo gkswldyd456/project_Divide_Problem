@@ -792,8 +792,8 @@ def equation_to_text_all(hwp): # 한글 파일 열어서 모든 수식 text화
             Act.GetDefault(Pset) # Pset.Item("String") 여기에 수식 안 내용 저장됨
             
             #임시 해보기
-            ST = re.sub('`|~|\s|\n|rm|it|\{|\}', "", Pset.Item("String")) # 수식 안 내용 중 `,~,띄어,엔터,rm,it,{,} 이거 제외
-            ST1 = re.sub('`|~|\s|\n', "", Pset.Item("String")) # 수식 안 내용 중 `,~,띄어,엔터 이거 제외
+            ST = re.sub('`|~|\s|\n|rm|it|bold|\{|\}', "", Pset.Item("String")) # 수식 안 내용 중 `,~,띄어,엔터,rm,it,{,} 이거 제외
+            ST1 = re.sub('`|~|bold|\s|\n', "", Pset.Item("String")) # 수식 안 내용 중 `,~,띄어,엔터 이거 제외
             ST2 = re.sub('\{*rm\{*(\d+)\}*\}*', r'\1', ST1) # ST1 내용 중 {rm{숫자}} -> 숫자로만 빼냄
             
             reST = re.findall('[^\d+-]', ST) # ST안 내용 중 숫자,+,-를 제외한 것들 리스트에 담아
