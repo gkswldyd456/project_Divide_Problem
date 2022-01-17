@@ -15,7 +15,7 @@ import re
 
 hwp=win.gencache.EnsureDispatch("HWPFrame.HwpObject")
 hwp.RegisterModule("FilePathCheckDLL", "FilePathCheckerModule") #한글 권한 설정 보안 레지스트리
-hwp.XHwpWindows.Item(0).Visible=False #백그라운드에서 동작(False) / 보이면서 동작(True)
+hwp.XHwpWindows.Item(0).Visible=True #백그라운드에서 동작(False) / 보이면서 동작(True)
 hwp.SetMessageBoxMode(0x00020000) # 예/아니오 -> 아니오
 hwp.SetMessageBoxMode(0x00000001) # 확인 박스 -> OK
 # hwp.SetMessageBoxMode(0x00000010) # 확인/취소 박스 -> OK
@@ -303,12 +303,14 @@ def tabdiv_pro_sol(): # 1탭에 문제만 2탭에 해설만 / 작동 후 해설 
     # 미주 번호 뒤에 있는 내용(해설내용) 복사 후 새탭에 넣어 (새탭2)
     hwp.MovePos(2)
     find_mizunum()
+    time.sleep(0.1)
     hwp.HAction.Run("SelectAll")
     time.sleep(0.1)
     hwp.HAction.Run("Copy")
     time.sleep(0.1)
     hwp.HAction.Run("FileNewTab")
     hwp.HAction.Run("Paste")
+    hwp.HAction.Run("PasteOriginal")
     time.sleep(0.1)
     hwp.MovePos(2)
     hwp.HAction.Run("MoveSelRight")
@@ -864,6 +866,10 @@ def preview_sol_hwp(): # 빠른정답만들기(각파일로) (새탭이 없을�
     for i in range(1, cnt_mizu+1):
     # for i in range(1, 2):
         find_mizunum()
+        hwp.HAction.Run("MoveRight")
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet);
+        hwp.HParameterSet.HInsertText.Text = " ";
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet);
         hwp.HAction.Run("Select");
         hwp.HAction.Run("Select");
         hwp.HAction.Run("Select");
@@ -893,13 +899,18 @@ def preview_sol_hwp(): # 빠른정답만들기(각파일로) (새탭이 없을�
         hwp.HParameterSet.HFindReplace.FindRegExp = 1;
         hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
 
+        hwp.MovePos(2)
+        # hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet);
+        # hwp.HParameterSet.HInsertText.Text = " ";
+        # hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet);
+
         hwp.HAction.Run("SelectAll")
         real_text = hwp.GetTextFile("TEXT","saveblock"); # real_text란 변수에 전체 텍스트 넣기
         hwp.HAction.Run("Cancel");
-        hwp.MovePos(2)
-        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet);
-        hwp.HParameterSet.HInsertText.Text = " ";
-        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet);
+        # hwp.MovePos(2)
+        # hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet);
+        # hwp.HParameterSet.HInsertText.Text = " ";
+        # hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet);
         hwp.MovePos(2)
         hwp.HAction.Run("MoveSelNextWord");
         hwp.HAction.Run("Delete");
