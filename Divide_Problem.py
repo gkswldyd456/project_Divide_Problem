@@ -633,7 +633,7 @@ def save_commonpro_png(start_num, last_num): # 공통문제 이미지(png)파일
 
 def save_presol_hwp(num, type):  # 정답 hwp파일 저장할거야 num = 문제번호, type = 정답종류
     global presol_hwp_name
-    presol_hwp_name = file_fullname.replace(".hwp", "") + " "+ str(num).zfill(3) +  "번 [3정답] [1hwp]" + str(type) # 확장자 없는 이름
+    presol_hwp_name = file_fullname.replace(".hwp", "") + " "+ str(num).zfill(3) +  "번 [3정답] [1hwp]." + str(type) # 확장자 없는 이름
     while os.path.isfile(presol_hwp_name+".hwp")==False:
         hwp.HAction.GetDefault("FileSave_S", hwp.HParameterSet.HFileOpenSave.HSet)
         hwp.HParameterSet.HFileOpenSave.filename = presol_hwp_name+".hwp"
@@ -794,8 +794,8 @@ def equation_to_text_all(hwp): # 한글 파일 열어서 모든 수식 text화
             Act.GetDefault(Pset) # Pset.Item("String") 여기에 수식 안 내용 저장됨
             
             #임시 해보기
-            ST = re.sub('`|~|\s|\n|rm|it|bold|\{|\}', "", Pset.Item("String")) # 수식 안 내용 중 `,~,띄어,엔터,rm,it,{,} 이거 제외
-            ST1 = re.sub('`|~|bold|\s|\n', "", Pset.Item("String")) # 수식 안 내용 중 `,~,띄어,엔터 이거 제외
+            ST = re.sub('`|~|\s|\n|rm|it|bold|\{|\}', "", Pset.Item("String"), flags=re.I) # 수식 안 내용 중 `,~,띄어,엔터,rm,it,{,} 이거 제외 / flags=re.I 이거는 대소문자 구분 없이
+            ST1 = re.sub('`|~|bold|\s|\n', "", Pset.Item("String"), flags=re.I) # 수식 안 내용 중 `,~,띄어,엔터 이거 제외
             ST2 = re.sub('\{*rm\{*(\d+)\}*\}*', r'\1', ST1) # ST1 내용 중 {rm{숫자}} -> 숫자로만 빼냄
             
             reST = re.findall('[^\d+-]', ST) # ST안 내용 중 숫자,+,-를 제외한 것들 리스트에 담아
@@ -1227,8 +1227,8 @@ def result_div(): #파일명 나누기 + 쪼개기
         # print(cnt_son_lists) # cnt_son_lists는 첫번째 새끼문제 부터 각 새끼문제의 개수 넣어둠.
         
         
-        if len(son_lists) != 0: # 새끼문제 있으면
-            Divide_son_files(son_lists) #새끼문제 돌려
+        # if len(son_lists) != 0: # 새끼문제 있으면
+        #     Divide_son_files(son_lists) #새끼문제 돌려
             
         time.sleep(1)
         lists = [i for i in os.listdir(dir) if i.startswith(f'{name_only}')] # name_only로 시작하는 파일 찾아라
@@ -1241,7 +1241,8 @@ def result_div(): #파일명 나누기 + 쪼개기
         
         for list in lists: # 지금 작업하는 파일 이름(name_only)이 있는 파일 다 옮겨라 
             try:
-                shutil.move(os.path.join(dir, list), os.path.join(dir, name_only))
+                if os.path.join(dir, list) != file_fullname:
+                    shutil.move(os.path.join(dir, list), os.path.join(dir, name_only))
             except PermissionError:
                 print(f"{list}이 파일이 오류나네??")
                 # os.remove(os.path.join(dir, list))
