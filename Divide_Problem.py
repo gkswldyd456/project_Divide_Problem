@@ -878,6 +878,10 @@ def preview_sol_hwp(): # 빠른정답만들기(각파일로) (새탭이 없을�
         hwp.HAction.Run("FileNewTab")
         hwp.HAction.Run("Paste")
         hwp.HAction.Run("PasteOriginal")
+        time.sleep(0.1)
+        page_size_set() # 페이지 크기 정보 106.5 , 1100 / 여백은 다 0
+        multicolumn_1() # 페이지 1단으로 
+        time.sleep(0.1)
         hwp.MovePos(2)
         find_mizunum()
         hwp.HAction.Run("MoveSelRight")
