@@ -929,7 +929,7 @@ def preview_sol_hwp(): # 빠른정답만들기(각파일로) (새탭이 없을�
         # cnt_TF = len(re.findall(r'[TF]', re_real_text)) # text 중 대문자 T, F 의 개수
         # cnt_TF_ko = len(re.findall(r'참|거짓', re_real_text)) # text 중 참 거짓 의 개수
         cnt_OXTF = len(re.findall(r'[OX]|[TF]|참|거짓', re_real_text)) # text 중 대문자 O, X, T, F, 참, 거짓 의 개수
-        cnt_OXTF_no_text = len(re.sub('O|X|T|F|참|거짓', "", re_real_text)) # re_real_text 문자열 중 O, X, T, F, 참, 거짓 를 제외한 문자
+        cnt_OXTF_no_text = len(re.sub('O|X|T|F|참|거짓', "", re_real_text)) # re_real_text 문자열 중 O, X, T, F, 참, 거짓 를 제외한 문자의 개수
         
         global cnt_son
         cnt_son = len(re.findall(r'@', re_real_text)) # text 중 @의 개수
