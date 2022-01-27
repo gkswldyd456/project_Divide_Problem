@@ -56,9 +56,13 @@ def onepageoneproblem(): # 한쪽에 한문제 (첫페이지는 표지)
     i=0
     while i < cnt_mizu :
         find_mizu()
+        time.sleep(0.1)
         hwp.HAction.Run("BreakPage"); # ctrl+enter
+        time.sleep(0.1)
         hwp.HAction.Run("MoveRight");
+        time.sleep(0.1)
         i = i+1
+    
     hwp.HAction.Run("MoveColumnEnd"); #단의 끝점으로 이동
     hwp.HAction.Run("BreakPage");
     hwp.MovePos(3) # 문서 제일 뒤로
@@ -287,6 +291,7 @@ def tabdiv_pro_sol(): # 1탭에 문제만 2탭에 해설만 / 작동 후 해설 
     # hwp.MovePos(2) # 문서 제일 앞으로
     find_mizu()
     hwp.HAction.Run("MoveSelPageDown")
+    time.sleep(0.1)
     hwp.HAction.Run("MoveSelLeft")
     hwp.HAction.Run("Copy")
     time.sleep(0.1)
@@ -366,6 +371,7 @@ def tabdiv_commonpro_sol(i): # 공통지문 -> 1탭에 문제 / i는 몇번째 �
     hwp.HAction.Run("WindowNextTab")
     find_commonproble()
     hwp.HAction.Run("MoveSelPageDown")
+    time.sleep(0.1)
     hwp.HAction.Run("MoveSelLeft")
     hwp.HAction.Run("Copy")
     time.sleep(0.1)
@@ -390,6 +396,7 @@ def tabdiv_sonpro_sol(): # 새끼문제 -> 1탭에 문제/ 작동 후 1탭에 �
     hwp.HAction.Run("WindowNextTab")
     find_sonproble() # 새끼문제 @ 찾아가기 (@앞으로)
     hwp.HAction.Run("MoveSelPageDown")
+    time.sleep(0.1)
     hwp.HAction.Run("MoveSelLeft")
     hwp.HAction.Run("Cut")
     time.sleep(0.1)
@@ -1050,6 +1057,7 @@ def Divide_files(file_fullname):
         hwp.HAction.Run("WindowNextTab")
         hwp.XHwpDocuments.Item(2).Close(isDirty=False)
         hwp.XHwpDocuments.Item(1).Close(isDirty=False)
+        time.sleep(0.1)
         # print(f"{cnt_mizu}번 중 {i}번 나누기 완료")
         progress_condi.insert(END, f"{cnt_mizu}번 중 {i}번 나누기 완료\n")
         progress_condi.see(END)
@@ -1245,8 +1253,9 @@ def result_div(): #파일명 나누기 + 쪼개기
         
         for list in lists: # 지금 작업하는 파일 이름(name_only)이 있는 파일 다 옮겨라 
             try:
-                if os.path.join(dir, list) != file_fullname:
-                    shutil.move(os.path.join(dir, list), os.path.join(dir, name_only))
+                # if os.path.join(dir, list) != file_fullname: # 원본파일은 제외해라
+                #     shutil.move(os.path.join(dir, list), os.path.join(dir, name_only))
+                shutil.move(os.path.join(dir, list), os.path.join(dir, name_only))
             except PermissionError:
                 print(f"{list}이 파일이 오류나네??")
                 # os.remove(os.path.join(dir, list))
