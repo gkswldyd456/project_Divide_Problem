@@ -6,7 +6,7 @@ import os, shutil
 import win32com.client as win
 import time
 from PIL import Image
-import olefile
+import olefile, zlib, struct
 import re
 
 
@@ -73,14 +73,69 @@ def onepageoneproblem(): # 한쪽에 한문제 (첫페이지는 표지)
     hwp.MovePos(2) # 문서 제일 앞으로
     
 
-def count_common_problem(file_fullname): # common_problems -> 공통지문 리스트 / cnt_common_problems -> 공통지문 개수 / 한글 열기 전에 써야함
-    f = olefile.OleFileIO(file_fullname) # HWP 파일 열기
-    encoded_text = f.openstream('PrvText').read() # PrvText 스트림의 내용 꺼내기
-    decoded_text = encoded_text.decode('UTF-16') # 유니코드를 UTF-16으로 디코딩
+# def count_common_problem(file_fullname): # -> 이거는 텍스트 길이의 제한이 있음.
+#     f = olefile.OleFileIO(file_fullname) # HWP 파일 열기
+#     encoded_text = f.openstream('PrvText').read() # PrvText 스트림의 내용 꺼내기
+#     decoded_text = encoded_text.decode('UTF-16') # 유니코드를 UTF-16으로 디코딩
+#     global common_problems, cnt_common_problems
+#     common_problems = re.findall('\$\$(\d+)#(\d+)\$\$', decoded_text)
+#     cnt_common_problems = len(common_problems)
+#     f.close()
+    
+def count_common_problem(file_fullname): # 한글 텍스트 전체 내용 가지고와서 common_problems -> 공통지문 리스트 / cnt_common_problems -> 공통지문 개수 / 한글 열기 전에 써야함
+    f = olefile.OleFileIO(file_fullname)
+    dirs = f.listdir()
+
+    # HWP 파일 검증
+    if ["FileHeader"] not in dirs or \
+       ["\x05HwpSummaryInformation"] not in dirs:
+        raise Exception("Not Valid HWP.")
+
+    # 문서 포맷 압축 여부 확인
+    header = f.openstream("FileHeader")
+    header_data = header.read()
+    is_compressed = (header_data[36] & 1) == 1
+
+    # Body Sections 불러오기
+    nums = []
+    for d in dirs:
+        if d[0] == "BodyText":
+            nums.append(int(d[1][len("Section"):]))
+    sections = ["BodyText/Section"+str(x) for x in sorted(nums)]
+
+    # 전체 text 추출
+    text = ""
+    for section in sections:
+        bodytext = f.openstream(section)
+        data = bodytext.read()
+        if is_compressed:
+            unpacked_data = zlib.decompress(data, -15)
+        else:
+            unpacked_data = data
+    
+        # 각 Section 내 text 추출    
+        section_text = ""
+        i = 0
+        size = len(unpacked_data)
+        while i < size:
+            header = struct.unpack_from("<I", unpacked_data, i)[0]
+            rec_type = header & 0x3ff
+            rec_len = (header >> 20) & 0xfff
+
+            if rec_type in [67]:
+                rec_data = unpacked_data[i+4:i+4+rec_len]
+                section_text += rec_data.decode('utf-16')
+                section_text += "\n"
+
+            i += 4 + rec_len
+
+        text += section_text
+        text += "\n"
     global common_problems, cnt_common_problems
-    common_problems = re.findall('\$\$(\d+)#(\d+)\$\$', decoded_text)
+    common_problems = re.findall('\$\$(\d+)#(\d+)\$\$', text)
     cnt_common_problems = len(common_problems)
     f.close()
+
 
 def find_commonproble(): # 공통지문 찾아가기 (공통지문 맨 앞으로)
     hwp.HAction.GetDefault("RepeatFind", hwp.HParameterSet.HFindReplace.HSet);
@@ -285,6 +340,7 @@ def tabdiv_pro_sol(): # 1탭에 문제만 2탭에 해설만 / 작동 후 해설 
     # 새 탭 만들고 다시 돌아와
     hwp.HAction.Run("FileNewTab")
     hwp.HAction.Run("WindowNextTab")
+    time.sleep(0.1)#임시시간
 
 
     # 미주 찾아가서 그 미주있는 페이지 복사 후 새탭에 넣어 (새탭1)
@@ -297,6 +353,7 @@ def tabdiv_pro_sol(): # 1탭에 문제만 2탭에 해설만 / 작동 후 해설 
     time.sleep(0.1)
     hwp.HAction.Run("Cancel")
     hwp.HAction.Run("WindowNextTab")
+    time.sleep(0.1)#임시시간
     hwp.HAction.Run("Paste")
     hwp.HAction.Run("PasteOriginal")
     time.sleep(0.1)
@@ -305,65 +362,87 @@ def tabdiv_pro_sol(): # 1탭에 문제만 2탭에 해설만 / 작동 후 해설 
     time.sleep(0.1)
 
 
-    # 미주 번호 뒤에 있는 내용(해설내용) 복사 후 새탭에 넣어 (새탭2)
-    hwp.MovePos(2)
-    find_mizunum()
-    time.sleep(0.1)
-    hwp.HAction.Run("SelectAll")
-    time.sleep(0.1)
-    hwp.HAction.Run("Copy")
-    time.sleep(0.1)
-    hwp.HAction.Run("FileNewTab")
-    hwp.HAction.Run("Paste")
-    hwp.HAction.Run("PasteOriginal")
-    time.sleep(0.1)
-    hwp.MovePos(2)
-    hwp.HAction.Run("MoveSelRight")
-    hwp.HAction.Run("DeleteBack")
-    
-    page_size_set() # 페이지 크기 정보 106.5 , 1100 / 여백은 다 0
-    multicolumn_1() # 페이지 1단으로 
-    time.sleep(0.1)
 
-
-    # 문제 부분 미주 없애고 해설 페이지로 돌아가
-    hwp.HAction.Run("WindowNextTab")
-    hwp.HAction.Run("WindowNextTab")
     hwp.MovePos(2)
-    find_mizu()
-    hwp.HAction.Run("MoveSelRight")
-    hwp.HAction.Run("DeleteBack")
-    hwp.HAction.Run("MoveViewEnd");
-    hwp.HAction.Run("MoveSelTopLevelEnd");
-    hwp.HAction.Run("Delete");
-    hwp.HAction.Run("WindowNextTab")
-    time.sleep(0.1)
-    hwp.MovePos(3) # 해설 맨 마지막 끝으로가서
-    
-    global solution_page
-    solution_page = hwp.KeyIndicator()[3] # 현재 커서의 페이지 번호 저장
-    
-    hwp.MovePos(2) # 해설 맨 처음으로
-    
-    hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet); # 해설 내용 중 정답이 있을 수 있으니 일단 하나 써주고
-    hwp.HParameterSet.HInsertText.Text = "[정답] ";
+    hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet);
+    hwp.HParameterSet.HInsertText.Text = " ";
     hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet);
-    
-    hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet); 
-    hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
-    hwp.HParameterSet.HFindReplace.FindString = "\\[정답\\]\\b*\\[*\\(*정답\\]*\\)*\\b*"; # [정답] 정답 형태 -> [정답] 으로 다 바꿔
-    hwp.HParameterSet.HFindReplace.ReplaceString = "[정답] "; # 바꾸는 문자는 정규식 안먹음
-    hwp.HParameterSet.HFindReplace.FindRegExp = 1;
-    hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
-    
-    hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet); 
-    hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
-    hwp.HParameterSet.HFindReplace.FindString = "@"; # @ 다 지워
-    hwp.HParameterSet.HFindReplace.ReplaceString = ""; 
-    hwp.HParameterSet.HFindReplace.FindRegExp = 1;
-    hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
-    
+    hwp.HAction.Run("SelectAll")
+    time.sleep(0.1)#임시시간
+    test_text = hwp.GetTextFile("TEXT","saveblock"); # test_text란 변수에 전체 텍스트 넣기
+    test_text = re.sub('\s+', "", test_text) # test_text 중 띄어쓰기제외
+    hwp.HAction.Run("Cancel");
+    count_eqed(hwp) # 수식개수 세기 / cnt_eqed 라는 변수에 저장
     hwp.MovePos(2)
+    hwp.HAction.Run("Delete");
+    
+    if len(test_text)!=0 or cnt_eqed!=0: # 만약 텍스트랑 수식이 하나라도 있으면 원래대로 진행해
+        # 미주 번호 뒤에 있는 내용(해설내용) 복사 후 새탭에 넣어 (새탭2)
+        hwp.MovePos(2)
+        find_mizunum()
+        time.sleep(0.1)
+        hwp.HAction.Run("SelectAll")
+        time.sleep(0.1)
+        hwp.HAction.Run("Copy")
+        time.sleep(0.1)
+        hwp.HAction.Run("FileNewTab")
+        time.sleep(0.1)#임시시간
+        hwp.HAction.Run("Paste")
+        hwp.HAction.Run("PasteOriginal")
+        time.sleep(0.1)
+        hwp.MovePos(2)
+        hwp.HAction.Run("MoveSelRight")
+        hwp.HAction.Run("DeleteBack")
+        
+        page_size_set() # 페이지 크기 정보 106.5 , 1100 / 여백은 다 0
+        multicolumn_1() # 페이지 1단으로 
+        time.sleep(0.1)
+
+
+        # 문제 부분 미주 없애고 해설 페이지로 돌아가
+        hwp.HAction.Run("WindowNextTab")
+        hwp.HAction.Run("WindowNextTab")
+        hwp.MovePos(2)
+        find_mizu()
+        time.sleep(0.1)#임시시간
+        hwp.HAction.Run("MoveSelRight")
+        time.sleep(0.1)#임시시간
+        hwp.HAction.Run("DeleteBack")
+        hwp.HAction.Run("MoveViewEnd");
+        hwp.HAction.Run("MoveSelTopLevelEnd");
+        hwp.HAction.Run("Delete");
+        hwp.HAction.Run("WindowNextTab")
+        time.sleep(0.1)
+        hwp.MovePos(3) # 해설 맨 마지막 끝으로가서
+        
+        global solution_page
+        solution_page = hwp.KeyIndicator()[3] # 현재 커서의 페이지 번호 저장
+        
+        hwp.MovePos(2) # 해설 맨 처음으로
+        
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet); # 해설 내용 중 정답이 있을 수 있으니 일단 하나 써주고
+        hwp.HParameterSet.HInsertText.Text = "[정답] ";
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet);
+        
+        hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet); 
+        hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
+        hwp.HParameterSet.HFindReplace.FindString = "\\[정답\\]\\b*\\[*\\(*정답\\]*\\)*\\b*"; # [정답] 정답 형태 -> [정답] 으로 다 바꿔
+        hwp.HParameterSet.HFindReplace.ReplaceString = "[정답] "; # 바꾸는 문자는 정규식 안먹음
+        hwp.HParameterSet.HFindReplace.FindRegExp = 1;
+        hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+        
+        hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet); 
+        hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
+        hwp.HParameterSet.HFindReplace.FindString = "@"; # @ 다 지워
+        hwp.HParameterSet.HFindReplace.ReplaceString = ""; 
+        hwp.HParameterSet.HFindReplace.FindRegExp = 1;
+        hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+        
+        hwp.MovePos(2)
+    else:
+        hwp.HAction.Run("FileNewTab")
+        page_size_set() # 페이지 크기 정보 106.5 , 1100 / 여백은 다 0
+        multicolumn_1() # 페이지 1단으로 
 
 
 def tabdiv_commonpro_sol(i): # 공통지문 -> 1탭에 문제 / i는 몇번째 공통지문 / 작동 후 1탭에 맨처음
@@ -800,7 +879,7 @@ def equation_to_text_all(hwp): # 한글 파일 열어서 모든 수식 text화
             Pset = Set.CreateItemSet("EqEdit", "EqEdit")
             Act.GetDefault(Pset) # Pset.Item("String") 여기에 수식 안 내용 저장됨
             
-            #임시 해보기
+            # 임시 해보기
             ST = re.sub('`|~|\s|\n|rm|it|bold|\{|\}', "", Pset.Item("String"), flags=re.I) # 수식 안 내용 중 `,~,띄어,엔터,rm,it,{,} 이거 제외 / flags=re.I 이거는 대소문자 구분 없이
             ST1 = re.sub('`|~|bold|\s|\n', "", Pset.Item("String"), flags=re.I) # 수식 안 내용 중 `,~,띄어,엔터 이거 제외
             ST2 = re.sub('\{*rm\{*(\d+)\}*\}*', r'\1', ST1) # ST1 내용 중 {rm{숫자}} -> 숫자로만 빼냄
@@ -873,16 +952,21 @@ def preview_sol_hwp(): # 빠른정답만들기(각파일로) (새탭이 없을�
     for i in range(1, cnt_mizu+1):
     # for i in range(1, 2):
         find_mizunum()
+        time.sleep(0.1)#임시시간
         hwp.HAction.Run("MoveRight")
         hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet);
         hwp.HParameterSet.HInsertText.Text = " ";
         hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet);
         hwp.HAction.Run("Select");
+        time.sleep(0.1)#임시시간
         hwp.HAction.Run("Select");
+        time.sleep(0.1)#임시시간
         hwp.HAction.Run("Select");
+        time.sleep(0.1)#임시시간
         hwp.HAction.Run("Copy");
         hwp.HAction.Run("Cancel");
         hwp.HAction.Run("FileNewTab")
+        time.sleep(0.1)#임시시간
         hwp.HAction.Run("Paste")
         hwp.HAction.Run("PasteOriginal")
         time.sleep(0.1)
@@ -890,115 +974,133 @@ def preview_sol_hwp(): # 빠른정답만들기(각파일로) (새탭이 없을�
         multicolumn_1() # 페이지 1단으로 
         time.sleep(0.1)
         hwp.MovePos(2)
-        find_mizunum()
-        hwp.HAction.Run("MoveSelRight")
-        hwp.HAction.Run("DeleteBack")
-        hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet); #정답 없애기
-        hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
-        hwp.HParameterSet.HFindReplace.FindString = "\\b*\\[*\\(*정답\\]*\\)*\\b*"; # 정답 형태를 [정답] 으로 다 바꿔
-        hwp.HParameterSet.HFindReplace.ReplaceString = " "; # 바꾸는 문자는 정규식 안먹음
-        hwp.HParameterSet.HFindReplace.FindRegExp = 1;
-        hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
-        time.sleep(0.1)
-        save_presol_png(i) # 정답 이미지(png)파일 저장할거야
-        count_eqed(hwp) # 수식개수 세기 / cnt_eqed 라는 변수에 저장
-        
-        hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet); # 엔터없애기
-        hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
-        hwp.HParameterSet.HFindReplace.FindString = "^n";
-        hwp.HParameterSet.HFindReplace.ReplaceString = "";
-        hwp.HParameterSet.HFindReplace.FindRegExp = 1;
-        hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
-
-        hwp.MovePos(2)
-        # hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet);
-        # hwp.HParameterSet.HInsertText.Text = " ";
-        # hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet);
-
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet);
+        hwp.HParameterSet.HInsertText.Text = " ";
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet);
         hwp.HAction.Run("SelectAll")
-        real_text = hwp.GetTextFile("TEXT","saveblock"); # real_text란 변수에 전체 텍스트 넣기
+        time.sleep(0.1)#임시시간
+        test_text = hwp.GetTextFile("TEXT","saveblock"); # test_text란 변수에 전체 텍스트 넣기
+        test_text = re.sub('\s+', "", test_text) # test_text 중 띄어쓰기제외
         hwp.HAction.Run("Cancel");
-        # hwp.MovePos(2)
-        # hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet);
-        # hwp.HParameterSet.HInsertText.Text = " ";
-        # hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet);
+        count_eqed(hwp) # 수식개수 세기 / cnt_eqed 라는 변수에 저장
         hwp.MovePos(2)
-        hwp.HAction.Run("MoveSelNextWord");
-        hwp.HAction.Run("Delete");
-        
-        
-        re_real_text = re.sub('\s+|,', "", real_text) # 수식을 제외한 글자들 중 띄어쓰기/,를 제외한 글자
-        
-        cnt_circ = len(re.findall(r'[①②③④⑤⑥⑦⑧⑨]', re_real_text)) # text 중 원문자 개수
-        cnt_circ_no = len(re.findall(r'[^①②③④⑤⑥⑦⑧⑨]', re_real_text)) # text 중 원문자 외 문자 개수
-        
-        # cnt_OX = len(re.findall(r'[OX]', re_real_text)) # text 중 대문자 O, X 의 개수
-        # cnt_TF = len(re.findall(r'[TF]', re_real_text)) # text 중 대문자 T, F 의 개수
-        # cnt_TF_ko = len(re.findall(r'참|거짓', re_real_text)) # text 중 참 거짓 의 개수
-        cnt_OXTF = len(re.findall(r'[OX]|[TF]|참|거짓', re_real_text)) # text 중 대문자 O, X, T, F, 참, 거짓 의 개수
-        cnt_OXTF_no_text = len(re.sub('O|X|T|F|참|거짓', "", re_real_text)) # re_real_text 문자열 중 O, X, T, F, 참, 거짓 를 제외한 문자의 개수
-        
-        global cnt_son
-        cnt_son = len(re.findall(r'@', re_real_text)) # text 중 @의 개수
-        if cnt_son !=0 : 
-            cnt_son_lists.append(cnt_son)
-        
-        if cnt_son == 0: # 만약 @(새끼문제 기호) 개수가 0이면 -> 새끼문제는 아니네
-            if "해설참조" not in re_real_text : # 해설참조 없을때 
-                if cnt_eqed == 0: # 만약 수식 개수가 0이면
-                    if len(re_real_text) == 0 : # 텍스트가 없으면 [빈해설파일] -> 수식도 없고 텍스트도 없으면 빈해설이지
-                        Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
-                        save_presol_hwp(i, "[빈해설파일]")
-                    elif cnt_circ_no == 0: # 원문자 외 문자가 없으면
-                        if cnt_circ == 1 : # 원문자가 1개 이면 [객관식(선다-단일)]
+        if len(test_text)!=0 or cnt_eqed!=0: # 만약 텍스트랑 수식이 하나라도 있으면 원래대로 진행해
+            find_mizunum()
+            time.sleep(0.1)#임시시간
+            hwp.HAction.Run("MoveSelRight")
+            hwp.HAction.Run("DeleteBack")
+            hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet); #정답 없애기
+            hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
+            hwp.HParameterSet.HFindReplace.FindString = "\\b*\\[*\\(*정답\\]*\\)*\\b*"; # 정답 형태를 [정답] 으로 다 바꿔
+            hwp.HParameterSet.HFindReplace.ReplaceString = " "; # 바꾸는 문자는 정규식 안먹음
+            hwp.HParameterSet.HFindReplace.FindRegExp = 1;
+            hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+            time.sleep(0.1)
+            save_presol_png(i) # 정답 이미지(png)파일 저장할거야
+            count_eqed(hwp) # 수식개수 세기 / cnt_eqed 라는 변수에 저장
+            
+            hwp.HAction.GetDefault("AllReplace", hwp.HParameterSet.HFindReplace.HSet); # 엔터없애기
+            hwp.HParameterSet.HFindReplace.Direction = hwp.FindDir("AllDoc");
+            hwp.HParameterSet.HFindReplace.FindString = "^n";
+            hwp.HParameterSet.HFindReplace.ReplaceString = "";
+            hwp.HParameterSet.HFindReplace.FindRegExp = 1;
+            hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet);
+            time.sleep(0.1)#임시시간
+
+            hwp.MovePos(2)
+            # hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet);
+            # hwp.HParameterSet.HInsertText.Text = " ";
+            # hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet);
+
+            hwp.HAction.Run("SelectAll")
+            time.sleep(0.1)#임시시간
+            real_text = hwp.GetTextFile("TEXT","saveblock"); # real_text란 변수에 전체 텍스트 넣기
+            hwp.HAction.Run("Cancel");
+            # hwp.MovePos(2)
+            # hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet);
+            # hwp.HParameterSet.HInsertText.Text = " ";
+            # hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet);
+            hwp.MovePos(2)
+            hwp.HAction.Run("MoveSelNextWord");
+            hwp.HAction.Run("Delete");
+            
+            
+            re_real_text = re.sub('\s+|,', "", real_text) # 수식을 제외한 글자들 중 띄어쓰기/,를 제외한 글자
+            
+            cnt_circ = len(re.findall(r'[①②③④⑤⑥⑦⑧⑨]', re_real_text)) # text 중 원문자 개수
+            cnt_circ_no = len(re.findall(r'[^①②③④⑤⑥⑦⑧⑨]', re_real_text)) # text 중 원문자 외 문자 개수
+            
+            # cnt_OX = len(re.findall(r'[OX]', re_real_text)) # text 중 대문자 O, X 의 개수
+            # cnt_TF = len(re.findall(r'[TF]', re_real_text)) # text 중 대문자 T, F 의 개수
+            # cnt_TF_ko = len(re.findall(r'참|거짓', re_real_text)) # text 중 참 거짓 의 개수
+            cnt_OXTF = len(re.findall(r'[OX]|[TF]|참|거짓', re_real_text)) # text 중 대문자 O, X, T, F, 참, 거짓 의 개수
+            cnt_OXTF_no_text = len(re.sub('O|X|T|F|참|거짓', "", re_real_text)) # re_real_text 문자열 중 O, X, T, F, 참, 거짓 를 제외한 문자의 개수
+            
+            global cnt_son
+            cnt_son = len(re.findall(r'@', re_real_text)) # text 중 @의 개수
+            if cnt_son !=0 : 
+                cnt_son_lists.append(cnt_son)
+            
+            if cnt_son == 0: # 만약 @(새끼문제 기호) 개수가 0이면 -> 새끼문제는 아니네
+                if "해설참조" not in re_real_text : # 해설참조 없을때 
+                    if cnt_eqed == 0: # 만약 수식 개수가 0이면
+                        if len(re_real_text) == 0 : # 텍스트가 없으면 [빈해설파일] -> 수식도 없고 텍스트도 없으면 빈해설이지
                             Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
-                            save_presol_hwp(i, "[객관식(선다-단일)]")
-                        elif cnt_circ > 1 : # 원문자가 2개 이상이면 
-                            Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
-                            save_presol_hwp(i, "[객관식(선다-다중)]")
-                        else : # 혹시 print 해보기
-                            progress_head.delete(1.0, END)
-                            progress_head.insert(END, f"원문자 외 문자가 없는데 원문자가 없어...이건 뭔상황일까???")
-                            progress_head.update()
-                    else: # 원문자 외 문자가 있으면
-                        if cnt_OXTF_no_text == 0: # O, X, T, F, 참, 거짓 외 글자가 존재 X ([정답]/띄어쓰기/콤마제외)
-                            if cnt_OXTF == 1: # O, X, T, F, 참, 거짓 -> 1개만 
+                            save_presol_hwp(i, "[빈해설파일]")
+                        elif cnt_circ_no == 0: # 원문자 외 문자가 없으면
+                            if cnt_circ == 1 : # 원문자가 1개 이면 [객관식(선다-단일)]
                                 Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
-                                save_presol_hwp(i, "[객관식(OX-단일)]")
-                            elif cnt_OXTF > 1: # O, X, T, F, 참, 거짓 -> 2개 이상 
+                                save_presol_hwp(i, "[객관식(선다-단일)]")
+                            elif cnt_circ > 1 : # 원문자가 2개 이상이면 
                                 Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
-                                save_presol_hwp(i, "[객관식(OX-다중)]")
+                                save_presol_hwp(i, "[객관식(선다-다중)]")
                             else : # 혹시 print 해보기
                                 progress_head.delete(1.0, END)
-                                progress_head.insert(END, f"O, X, T, F, 참, 거짓 외 글자가 없는데 저게 없어...이건 뭔상황일까???")
+                                progress_head.insert(END, f"원문자 외 문자가 없는데 원문자가 없어...이건 뭔상황일까???")
                                 progress_head.update()
-                        else : # O, X, T, F, 참, 거짓 외 글자가 존재 O
+                        else: # 원문자 외 문자가 있으면
+                            if cnt_OXTF_no_text == 0: # O, X, T, F, 참, 거짓 외 글자가 존재 X ([정답]/띄어쓰기/콤마제외)
+                                if cnt_OXTF == 1: # O, X, T, F, 참, 거짓 -> 1개만 
+                                    Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
+                                    save_presol_hwp(i, "[객관식(OX-단일)]")
+                                elif cnt_OXTF > 1: # O, X, T, F, 참, 거짓 -> 2개 이상 
+                                    Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
+                                    save_presol_hwp(i, "[객관식(OX-다중)]")
+                                else : # 혹시 print 해보기
+                                    progress_head.delete(1.0, END)
+                                    progress_head.insert(END, f"O, X, T, F, 참, 거짓 외 글자가 없는데 저게 없어...이건 뭔상황일까???")
+                                    progress_head.update()
+                            else : # O, X, T, F, 참, 거짓 외 글자가 존재 O
+                                Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
+                                save_presol_hwp(i, "[주관식(자판)]")
+                    elif cnt_eqed == 1: # 만약 수식 개수가 1개 이면
+                        equation_to_text_all(hwp)
+                        if len(sum_reST) == 0: # +-숫자 외의 문자가 없으면 -> 정수
                             Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
-                            save_presol_hwp(i, "[주관식(자판)]")
-                elif cnt_eqed == 1: # 만약 수식 개수가 1개 이면
-                    equation_to_text_all(hwp)
-                    if len(sum_reST) == 0: # +-숫자 외의 문자가 없으면 -> 정수
-                        Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
-                        save_presol_hwp(i, "[주관식(정수)]")
-                    else : # +-숫자 외의 문자가 있으면 -> 정수 X -> 단 <보기> 정답 a,b,c 이런 경우는 사람이 고쳐야함
+                            save_presol_hwp(i, "[주관식(정수)]")
+                        else : # +-숫자 외의 문자가 있으면 -> 정수 X -> 단 <보기> 정답 a,b,c 이런 경우는 사람이 고쳐야함
+                            Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
+                            save_presol_hwp(i, "[주관식(iink)]")
+                    else: # 만약 수식 개수가 2개 이상이면 -> 단 <보기> 정답 a,b,c 이런 경우는 사람이 고쳐야함
+                        equation_to_text_all(hwp)
                         Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
                         save_presol_hwp(i, "[주관식(iink)]")
-                else: # 만약 수식 개수가 2개 이상이면 -> 단 <보기> 정답 a,b,c 이런 경우는 사람이 고쳐야함
-                    equation_to_text_all(hwp)
+                else: # 해설참조 있으면 [증명문제]
                     Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
-                    save_presol_hwp(i, "[주관식(iink)]")
-            else: # 해설참조 있으면 [증명문제]
-                Allreplace_circ() # 원숫자 다 괄호숫자로 바꾸기
-                save_presol_hwp(i, "[증명문제]") 
-        else: # 만약 @(새끼문제 기호) 개수가 0이면 -> 새끼문제이네
-            save_presol_hwp(i, "[새끼문제]") # 일단 새끼문제는 저장한 후 다시 처
+                    save_presol_hwp(i, "[증명문제]") 
+            else: # 만약 @(새끼문제 기호) 개수가 0이면 -> 새끼문제이네
+                save_presol_hwp(i, "[새끼문제]") # 일단 새끼문제는 저장한 후 다시 처
 
-        time.sleep(0.2)
-        # print(f"{cnt_mizu}번 중 {i}번 정답 추출 완료")
-        progress_condi.insert(END, f"{cnt_mizu}번 중 {i}번 정답 추출 완료\n")
-        progress_condi.see(END)
-        progress_condi.update()
-        hwp.XHwpDocuments.Item(1).Close(isDirty=False) # 새창 닫아(저장할지 물어보지 말고)
+            time.sleep(0.2)
+            # print(f"{cnt_mizu}번 중 {i}번 정답 추출 완료")
+            progress_condi.insert(END, f"{cnt_mizu}번 중 {i}번 정답 추출 완료\n")
+            progress_condi.see(END)
+            progress_condi.update()
+            hwp.XHwpDocuments.Item(1).Close(isDirty=False) # 새창 닫아(저장할지 물어보지 말고)
+        else:
+            save_presol_png(i)
+            save_presol_hwp(i, "[복사안됨--다시처리해]")
+            hwp.XHwpDocuments.Item(1).Close(isDirty=False) # 새창 닫아(저장할지 물어보지 말고)
 
 def Divide_files(file_fullname):
     
@@ -1058,6 +1160,7 @@ def Divide_files(file_fullname):
         hwp.XHwpDocuments.Item(2).Close(isDirty=False)
         hwp.XHwpDocuments.Item(1).Close(isDirty=False)
         time.sleep(0.1)
+        time.sleep(0.1)#임시시간
         # print(f"{cnt_mizu}번 중 {i}번 나누기 완료")
         progress_condi.insert(END, f"{cnt_mizu}번 중 {i}번 나누기 완료\n")
         progress_condi.see(END)
