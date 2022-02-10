@@ -206,7 +206,7 @@ def page_size_set(): # 페이지 크기 정보 106.5 , 1100 / 여백은 다 0
     hwp.HParameterSet.HSecDef.PageDef.PaperHeight = hwp.MiliToHwpUnit(1110.0)
     hwp.HParameterSet.HSecDef.PageDef.LeftMargin = hwp.MiliToHwpUnit(0.0)
     hwp.HParameterSet.HSecDef.PageDef.RightMargin = hwp.MiliToHwpUnit(0.0)
-    hwp.HParameterSet.HSecDef.PageDef.TopMargin = hwp.MiliToHwpUnit(0.0)
+    hwp.HParameterSet.HSecDef.PageDef.TopMargin = hwp.MiliToHwpUnit(1.0)
     hwp.HParameterSet.HSecDef.PageDef.BottomMargin = hwp.MiliToHwpUnit(0.0)
     hwp.HParameterSet.HSecDef.PageDef.HeaderLen = hwp.MiliToHwpUnit(0.0)
     hwp.HParameterSet.HSecDef.PageDef.FooterLen = hwp.MiliToHwpUnit(0.0)
